@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Absensi - Class Meeting 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --primary: #bc84ee;
+            --accent: #dcfd8b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { 
+            background-color: var(--bg-dark); color: var(--text-main);
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at 50% 0%, rgba(188, 132, 238, 0.15) 0%, transparent 50%);
+        }
+
+        header { text-align: center; padding: 40px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        h1 { font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 36px; letter-spacing: -1px; }
+        h1 span { color: var(--primary); }
+        .subtitle { color: var(--accent); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 10px; }
+
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; margin: 40px auto; padding: 0 20px; width: 100%; }
+
+        .form-section { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: var(--text-dim); font-weight: 600; font-size: 14px; }
+        input, select { 
+            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5); color: white; font-size: 16px; transition: all 0.3s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(188, 132, 238, 0.3); }
+        
+        button { 
+            width: 100%; padding: 15px; background: var(--primary); color: #000; border: none;
+            border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer;
+            transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        button:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(220, 253, 139, 0.2); }
+
+        .feed-section { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; display: flex; flex-direction: column; }
+        .feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .live-indicator { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 14px; font-weight: 600; }
+        .dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 253, 139, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(220, 253, 139, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 253, 139, 0); } }
+
+        .feed-list { flex-grow: 1; overflow-y: auto; max-height: 500px; display: flex; flex-direction: column; gap: 15px; padding-right: 10px; }
+        .feed-list::-webkit-scrollbar { width: 6px; }
+        .feed-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .feed-item { background: rgba(0,0,0,0.4); border-left: 4px solid var(--primary); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .feed-info h4 { margin: 0 0 5px 0; color: white; }
+        .feed-info p { margin: 0; font-size: 13px; color: var(--text-dim); }
+        .timestamp { font-size: 12px; color: var(--text-dim); font-family: monospace; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CLASS MEETING <span>2026</span></h1>
+        <div class="subtitle"><i class="fa-solid fa-satellite-dish"></i> Live Coordination Portal</div>
+    </header>
+
+    <div class="container">
+        <div class="form-section">
+            <h2 style="margin-top: 0; font-family: 'Space Grotesk';">Form Kehadiran</h2>
+            <form id="absenForm">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="nama" placeholder="Contoh: Revanno A." required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Divisi / Posisi</label>
+                    <select id="divisi" required>
+                        <option value="" disabled selected>Pilih Divisi...</option>
+                        <option value="BPH (Pimpinan/Sekretaris/Bendahara)">BPH (Pimpinan/Sekretaris/Bendahara)</option>
+                        <option value="Acara & MC">Acara & MC</option>
+                        <option value="Keamanan">Keamanan</option>
+                        <option value="Perlengkapan">Perlengkapan</option>
+                        <option value="PDD / Dokumentasi">PDD / Dokumentasi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status Kehadiran</label>
+                    <select id="status" required>
+                        <option value="Hadir (On Cam)">Hadir (On Cam)</option>
+                        <option value="Hadir (Off Cam)">Hadir (Off Cam)</option>
+                    </select>
+                </div>
+                <button type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Absen</button>
+            </form>
+        </div>
+
+        <div class="feed-section">
+            <div class="feed-header">
+                <h2 style="margin: 0; font-family: 'Space Grotesk';">Live Attendance</h2>
+                <div class="live-indicator"><div class="dot"></div> REAL-TIME</div>
+            </div>
+            <div class="feed-list" id="feedList">
+                <div style="text-align: center; color: var(--text-dim); margin-top: 20px;">Menghubungkan ke database...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GANTI DENGAN URL APPS SCRIPT KAMU
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzOeNrPNSA7cZoXr-DHtSatYNsgceaoWB6SzCx1u4iZXR_WY9K5Q10qfwNp9opMC1ZOXg/exec';
+
+        fetchData();
+        setInterval(fetchData, 5000);
+
+        document.getElementById('absenForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            const submitBtn = this.querySelector('button');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...';
+            submitBtn.disabled = true;
+
+            const payload = {
+                nama: document.getElementById('nama').value,
+                divisi: document.getElementById('divisi').value,
+                status: document.getElementById('status').value
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                this.reset();
+                await fetchData();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Gagal kirim data!");
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                renderFeed(data);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function renderFeed(absenData) {
+            const feedList = document.getElementById('feedList');
+            feedList.innerHTML = ''; 
+
+            if(!absenData || absenData.length === 0) {
+                feedList.innerHTML = '<div style="text-align: center; color: var(--text-dim); margin-top: 20px;">Belum ada yang absen.</div>';
+                return;
+            }
+
+            absenData.forEach(data => {
+                const item = document.createElement('div');
+                item.className = 'feed-item';
+                
+                let borderCol = 'var(--primary)';
+                if(data.divisi.includes('Keamanan')) borderCol = '#ff823a';
+                if(data.divisi.includes('Perlengkapan')) borderCol = 'var(--accent)';
+                if(data.divisi.includes('BPH')) borderCol = '#ef4444';
+                
+                item.style.borderLeftColor = borderCol;
+                item.innerHTML = `
+                    <div class="feed-info">
+                        <h4>${data.nama} <span style="font-size:12px; font-weight:normal; color:var(--text-dim);">(${data.status})</span></h4>
+                        <p><i class="fa-solid fa-tag"></i> ${data.divisi}</p>
+                    </div>
+                    <div class="timestamp">${data.time}</div>
+                `;
+                feedList.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
